@@ -94,25 +94,27 @@ struct ChatListView: View {
 // 聊天内容视图
 struct ChatContentView: View {
     @StateObject private var themeManager = ThemeManager.shared
+    @State private var inputMessage = ""
     
     var body: some View {
         VStack {
             // 消息列表区域
-            ScrollView {
-                VStack(spacing: 16) {
-                    Text("消息内容区域")
-                        .foregroundColor(themeManager.colors.foreground)
-                }
-                .padding()
-            }
+            MessageListView()
             
             // 输入区域
             HStack {
-                TextField("输入消息...", text: .constant(""))
+                TextField("输入消息...", text: $inputMessage)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .onSubmit {
+                        guard !inputMessage.isEmpty else { return }
+                        MessageManager.shared.addMessage(.user, inputMessage)
+                        inputMessage = ""
+                    }
                 
                 Button("发送") {
-                    // TODO: 实现发送消息功能
+                    guard !inputMessage.isEmpty else { return }
+                    MessageManager.shared.addMessage(.user, inputMessage)
+                    inputMessage = ""
                 }
                 .buttonStyle(.borderedProminent)
             }
