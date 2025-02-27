@@ -9,6 +9,7 @@ import SwiftUI
 
 struct MainView: View {
     @StateObject private var themeManager = ThemeManager.shared
+    @State private var showSettings = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -40,7 +41,7 @@ struct MainView: View {
                 
                 // 设置按钮
                 Button(action: {
-                    // TODO: 打开设置面板
+                    showSettings = true
                 }) {
                     Image(systemName: "gearshape.fill")
                         .foregroundColor(themeManager.colors.foreground)
@@ -64,13 +65,16 @@ struct MainView: View {
             .background(themeManager.colors.background)
             
             HSplitView {
-            // 左侧聊天列表
-            ChatListView()
-                .frame(minWidth: 200, maxWidth: 300)
-            
-            // 右侧聊天内容
-            ChatContentView()
-                .frame(minWidth: 400)
+                // 左侧聊天列表
+                ChatListView()
+                    .frame(minWidth: 200, maxWidth: 300)
+                
+                // 右侧聊天内容
+                ChatContentView()
+                    .frame(minWidth: 400)
+            }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
         }
         .background(themeManager.colors.background)
     }
@@ -151,4 +155,7 @@ struct ChatContentView: View {
 }
 
 
+}
+#Preview {
+    MainView()
 }
