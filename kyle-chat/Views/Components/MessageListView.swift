@@ -23,7 +23,7 @@ struct MessageListView: View {
                     }
                 }
                 .padding()
-                .onChange(of: messageManager.messages.count) { _ in
+                .onChange(of: messageManager.messages.count) { _,_ in
                     withAnimation(.easeOut(duration: 0.3)) {
                         proxy.scrollTo(messageManager.messages.count - 1, anchor: .bottom)
                     }

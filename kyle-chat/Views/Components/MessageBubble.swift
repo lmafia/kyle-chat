@@ -36,11 +36,12 @@ struct MessageBubble: View {
     
     var body: some View {
         VStack(alignment: alignment) {
-            HStack {
+            HStack(spacing: 0) {
                 if type == .assistant {
                     Image(systemName: "brain")
                         .foregroundColor(themeManager.colors.accent)
-                        .frame(width: 24, height: 24)
+                        .imageScale(.large)
+                        .frame(width: 32, height: 32)
                 }
                 
                 Text(content)
@@ -54,7 +55,8 @@ struct MessageBubble: View {
                 if type == .user {
                     Image(systemName: "person.circle.fill")
                         .foregroundColor(themeManager.colors.accent)
-                        .frame(width: 24, height: 24)
+                        .imageScale(.large)
+                        .frame(width: 32, height: 32)
                 }
             }
             .frame(maxWidth: .infinity, alignment: type == .user ? .trailing : .leading)

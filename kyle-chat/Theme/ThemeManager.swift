@@ -11,7 +11,6 @@ import SwiftUI
 enum ThemeType: String {
     case light = "light"
     case dark = "dark"
-    case system = "system"
 }
 
 /// 主题颜色
@@ -45,7 +44,7 @@ struct ThemeColors {
 class ThemeManager: ObservableObject {
     static let shared = ThemeManager()
     
-    @Published var currentTheme: ThemeType = .system {
+    @Published var currentTheme: ThemeType = isDarkMode ? .dark : .light {
         didSet {
             UserDefaults.standard.set(currentTheme.rawValue, forKey: "AppTheme")
             updateThemeColors()
@@ -56,13 +55,15 @@ class ThemeManager: ObservableObject {
     private var appearanceObserver: NSKeyValueObservation?
     
     private init() {
-        // 从 UserDefaults 读取保存的主题设置
+        // 从 UserDefaults 读取保存的主题设置，如果没有则根据系统主题设置默认值
         if let savedTheme = UserDefaults.standard.string(forKey: "AppTheme"),
            let theme = ThemeType(rawValue: savedTheme) {
             self.currentTheme = theme
-            // 根据当前主题设置颜色
-            self.colors = ThemeManager.getThemeColors(for: currentTheme)
+        } else {
+            self.currentTheme = ThemeManager.isDarkMode ? .dark : .light
         }
+        // 根据当前主题设置颜色
+        self.colors = ThemeManager.getThemeColors(for: currentTheme)
         
         // 监听系统主题变化
         appearanceObserver = NSApplication.shared.observe(\NSApplication.effectiveAppearance) { [weak self] _, _ in
@@ -73,14 +74,7 @@ class ThemeManager: ObservableObject {
     /// 切换主题
     func toggleTheme() {
         withAnimation(.easeInOut(duration: 0.3)) {
-            switch currentTheme {
-            case .light:
-                currentTheme = .dark
-            case .dark:
-                currentTheme = .system
-            case .system:
-                currentTheme = .light
-            }
+            currentTheme = currentTheme == .light ? .dark : .light
         }
     }
     
@@ -98,8 +92,6 @@ class ThemeManager: ObservableObject {
             return .light
         case .dark:
             return .dark
-        case .system:
-            return isDarkMode ? .dark : .light
         }
     }
     

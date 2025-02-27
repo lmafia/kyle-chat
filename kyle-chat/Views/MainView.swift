@@ -102,23 +102,49 @@ struct ChatContentView: View {
             MessageListView()
             
             // 输入区域
-            HStack {
+            HStack(spacing: 12) {
                 TextField("输入消息...", text: $inputMessage)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .foregroundStyle(themeManager.colors.foreground)
+                    .textFieldStyle(.plain)
+                    .tint(themeManager.colors.accent)
+                    .environment(\.colorScheme, themeManager.currentTheme == .dark ? .dark : .light)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(themeManager.colors.secondary.opacity(0.1))
+                    .cornerRadius(20)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(themeManager.colors.secondary.opacity(0.2), lineWidth: 1)
+                    )
                     .onSubmit {
                         guard !inputMessage.isEmpty else { return }
                         MessageManager.shared.addMessage(.user, inputMessage)
                         inputMessage = ""
                     }
                 
-                Button("发送") {
+                Button(action: {
                     guard !inputMessage.isEmpty else { return }
                     MessageManager.shared.addMessage(.user, inputMessage)
                     inputMessage = ""
+                }) {
+                    Image(systemName: "arrow.up.circle.fill")
+                        .resizable()
+                        .frame(width: 32, height: 32)
+                        .foregroundColor(themeManager.colors.accent)
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.plain)
+                .contentShape(Circle())
+                .help("发送消息")
+                .onHover { isHovered in
+                    if isHovered {
+                        NSCursor.pointingHand.push()
+                    } else {
+                        NSCursor.pop()
+                    }
+                }
             }
-            .padding()
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
         }
         .background(themeManager.colors.background)
     }
