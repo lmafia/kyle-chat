@@ -46,10 +46,11 @@ struct MessageBubble: View {
                 
                 Text(content)
                     .foregroundColor(themeManager.colors.foreground)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(bubbleColor.opacity(0.1))
-                    .cornerRadius(16)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(bubbleColor.opacity(0.15))
+                    .cornerRadius(18)
+                    .shadow(color: bubbleColor.opacity(0.1), radius: 2, x: 0, y: 1)
                     .frame(maxWidth: 500, alignment: type == .user ? .trailing : .leading)
                 
                 if type == .user {

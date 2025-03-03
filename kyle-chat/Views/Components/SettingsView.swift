@@ -6,6 +6,7 @@ struct SettingsView: View {
     @StateObject private var userManager = UserManager()
     @State private var username: String = ""
     @State private var apiKey: String = ""
+    @State private var isAPIKeyVisible: Bool = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -35,7 +36,7 @@ struct SettingsView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             TextField("用户名", text: $username)
                                 .textFieldStyle(.roundedBorder)
-                                .onChange(of: username) { newValue in
+                                .onChange(of: username) {_, newValue in
                                     userManager.saveUsername(newValue)
                                 }
                         }
@@ -44,11 +45,26 @@ struct SettingsView: View {
                     // API 设置
                     SettingsSection(title: "API 设置") {
                         VStack(alignment: .leading, spacing: 12) {
-                            SecureField("OpenAI API Key", text: $apiKey)
-                                .textFieldStyle(.roundedBorder)
-                                .onChange(of: apiKey) { newValue in
-                                    UserDefaults.standard.set(newValue, forKey: "OpenAIAPIKey")
+                            HStack {
+                                if isAPIKeyVisible {
+                                    TextField("OpenAI API Key", text: $apiKey)
+                                        .textFieldStyle(.roundedBorder)
+                                } else {
+                                    SecureField("OpenAI API Key", text: $apiKey)
+                                        .textFieldStyle(.roundedBorder)
                                 }
+                                
+                                Button(action: {
+                                    isAPIKeyVisible.toggle()
+                                }) {
+                                    Image(systemName: isAPIKeyVisible ? "eye.slash.fill" : "eye.fill")
+                                        .foregroundColor(themeManager.colors.foreground.opacity(0.6))
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            .onChange(of: apiKey) {_, newValue in
+                                UserDefaults.standard.set(newValue, forKey: "OpenAIAPIKey")
+                            }
                             
                             Text("请输入您的 OpenAI API Key，它将被安全地存储在本地")
                                 .font(.caption)
@@ -62,7 +78,7 @@ struct SettingsView: View {
         .frame(width: 400, height: 500)
         .background(themeManager.colors.background)
         .onAppear {
-            username = userManager.username ?? ""
+            username = userManager.username
             apiKey = UserDefaults.standard.string(forKey: "OpenAIAPIKey") ?? ""
         }
     }

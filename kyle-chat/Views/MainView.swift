@@ -15,6 +15,12 @@ struct MainView: View {
         VStack(spacing: 0) {
             // 顶部工具栏
             HStack {
+                Text("Kyle Chat")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(themeManager.colors.foreground)
+                    .padding(.leading, 16)
+                
                 Spacer()
                 
                 // 主题切换按钮
@@ -23,9 +29,9 @@ struct MainView: View {
                 }) {
                     Image(systemName: themeManager.currentTheme == .light ? "sun.max.fill" : "moon.fill")
                         .foregroundColor(themeManager.colors.foreground)
-                        .frame(width: 32, height: 32)
-                        .background(themeManager.colors.background)
-                        .cornerRadius(8)
+                        .frame(width: 36, height: 36)
+                        .background(themeManager.colors.secondary.opacity(0.1))
+                        .cornerRadius(10)
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal, 4)
@@ -45,9 +51,9 @@ struct MainView: View {
                 }) {
                     Image(systemName: "gearshape.fill")
                         .foregroundColor(themeManager.colors.foreground)
-                        .frame(width: 32, height: 32)
-                        .background(themeManager.colors.background)
-                        .cornerRadius(8)
+                        .frame(width: 36, height: 36)
+                        .background(themeManager.colors.secondary.opacity(0.1))
+                        .cornerRadius(10)
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal, 8)
@@ -61,8 +67,9 @@ struct MainView: View {
                     }
                 }
             }
-            .frame(height: 40)
+            .frame(height: 50)
             .background(themeManager.colors.background)
+            .shadow(color: themeManager.colors.secondary.opacity(0.1), radius: 2, x: 0, y: 1)
             
             HSplitView {
                 // 左侧聊天列表
@@ -73,25 +80,33 @@ struct MainView: View {
                 ChatContentView()
                     .frame(minWidth: 400)
             }
-        .sheet(isPresented: $showSettings) {
-            SettingsView()
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
+            }
+            .background(themeManager.colors.background)
         }
-        .background(themeManager.colors.background)
     }
-}
-
-// 聊天列表视图
-struct ChatListView: View {
-    @StateObject private var themeManager = ThemeManager.shared
     
-    var body: some View {
-        List {
-            Text("聊天列表")
-                .foregroundColor(themeManager.colors.foreground)
+    // 聊天列表视图
+    struct ChatListView: View {
+        @StateObject private var themeManager = ThemeManager.shared
+        
+        var body: some View {
+            List {
+                Text("聊天列表")
+                    .font(.headline)
+                    .foregroundColor(themeManager.colors.foreground)
+                    .padding(.vertical, 8)
+            }
+            .listStyle(SidebarListStyle())
+            .background(themeManager.colors.background)
+            .scrollContentBackground(.hidden)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(themeManager.colors.secondary.opacity(0.1), lineWidth: 1)
+            )
         }
-        .listStyle(SidebarListStyle())
-        .background(themeManager.colors.background)
-        .scrollContentBackground(.hidden)
     }
 }
 
@@ -113,13 +128,14 @@ struct ChatContentView: View {
                     .tint(themeManager.colors.accent)
                     .environment(\.colorScheme, themeManager.currentTheme == .dark ? .dark : .light)
                     .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(themeManager.colors.secondary.opacity(0.1))
-                    .cornerRadius(20)
+                    .padding(.vertical, 10)
+                    .background(themeManager.colors.secondary.opacity(0.08))
+                    .cornerRadius(24)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(themeManager.colors.secondary.opacity(0.2), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 24)
+                            .stroke(themeManager.colors.secondary.opacity(0.15), lineWidth: 1)
                     )
+                    .shadow(color: themeManager.colors.secondary.opacity(0.05), radius: 2, x: 0, y: 1)
                     .onSubmit {
                         guard !inputMessage.isEmpty else { return }
                         MessageManager.shared.addMessage(.user, inputMessage)
@@ -133,8 +149,9 @@ struct ChatContentView: View {
                 }) {
                     Image(systemName: "arrow.up.circle.fill")
                         .resizable()
-                        .frame(width: 32, height: 32)
-                        .foregroundColor(themeManager.colors.accent)
+                        .frame(width: 38, height: 38)
+                        .foregroundColor(themeManager.colors.primary)
+                        .shadow(color: themeManager.colors.primary.opacity(0.2), radius: 2, x: 0, y: 1)
                 }
                 .buttonStyle(.plain)
                 .contentShape(Circle())
@@ -147,15 +164,13 @@ struct ChatContentView: View {
                     }
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
         }
         .background(themeManager.colors.background)
     }
 }
 
-
-}
 #Preview {
     MainView()
 }
