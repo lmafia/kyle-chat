@@ -11,6 +11,7 @@ import SwiftUI
 enum MessageType {
     case user
     case assistant
+    case system
 }
 
 /// 消息气泡组件
@@ -18,8 +19,10 @@ struct MessageBubble: View {
     let type: MessageType
     let content: String
     let timestamp: Date
+    let status: MessageStatus
     
     @StateObject private var themeManager = ThemeManager.shared
+    @State private var isAnimating = false
     
     private var bubbleColor: Color {
         switch type {
@@ -27,6 +30,8 @@ struct MessageBubble: View {
             return themeManager.colors.primary
         case .assistant:
             return themeManager.colors.secondary
+        case .system:
+            return themeManager.colors.accent
         }
     }
     
@@ -42,16 +47,44 @@ struct MessageBubble: View {
                         .foregroundColor(themeManager.colors.accent)
                         .imageScale(.large)
                         .frame(width: 32, height: 32)
+                } else if type == .system {
+                    Image(systemName: "exclamationmark.triangle")
+                        .foregroundColor(themeManager.colors.accent)
+                        .imageScale(.large)
+                        .frame(width: 32, height: 32)
                 }
                 
-                Text(content)
-                    .foregroundColor(themeManager.colors.foreground)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-                    .background(bubbleColor.opacity(0.15))
-                    .cornerRadius(18)
-                    .shadow(color: bubbleColor.opacity(0.1), radius: 2, x: 0, y: 1)
-                    .frame(maxWidth: 500, alignment: type == .user ? .trailing : .leading)
+                HStack(spacing: 8) {
+                    Text(content)
+                        .foregroundColor(themeManager.colors.foreground)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(bubbleColor.opacity(0.15))
+                        .cornerRadius(18)
+                        .shadow(color: bubbleColor.opacity(0.1), radius: 2, x: 0, y: 1)
+                        .frame(maxWidth: 500, alignment: type == .user ? .trailing : .leading)
+                    
+                    if status == .generating {
+                        HStack(spacing: 4) {
+                            ForEach(0..<3) { index in
+                                Circle()
+                                    .fill(themeManager.colors.accent)
+                                    .frame(width: 6, height: 6)
+                                    .opacity(isAnimating ? 0.2 : 1)
+                                    .animation(
+                                        .easeInOut(duration: 0.8)
+                                        .repeatForever()
+                                        .delay(Double(index) * 0.2),
+                                        value: isAnimating
+                                    )
+                            }
+                        }
+                        .padding(.trailing, 16)
+                        .onAppear {
+                            isAnimating = true
+                        }
+                    }
+                }
                 
                 if type == .user {
                     Image(systemName: "person.circle.fill")
@@ -74,7 +107,7 @@ struct MessageBubble: View {
 
 #Preview {
     VStack {
-        MessageBubble(type: .user, content: "这是用户发送的消息", timestamp: Date())
-        MessageBubble(type: .assistant, content: "这是助手回复的消息", timestamp: Date())
+        MessageBubble(type: .user, content: "这是用户发送的消息", timestamp: Date(), status: .generating)
+        MessageBubble(type: .assistant, content: "这是助手回复的消息", timestamp: Date(), status: .normal)
     }
 }

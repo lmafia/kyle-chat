@@ -17,8 +17,8 @@ struct MessageListView: View {
             ScrollView {
                 LazyVStack(spacing: 16) {
                     ForEach(messageManager.messages.indices, id: \.self) { index in
-                        let (type, content, timestamp) = messageManager.messages[index]
-                        MessageBubble(type: type, content: content, timestamp: timestamp)
+                        let message = messageManager.messages[index]
+                        MessageBubble(type: message.type, content: message.content, timestamp: message.timestamp, status: message.status)
                             .id(index)
                     }
                 }

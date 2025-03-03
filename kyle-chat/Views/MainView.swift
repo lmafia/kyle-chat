@@ -113,7 +113,9 @@ struct MainView: View {
 // 聊天内容视图
 struct ChatContentView: View {
     @StateObject private var themeManager = ThemeManager.shared
+    @StateObject private var messageManager = MessageManager.shared
     @State private var inputMessage = ""
+    @State private var isGenerating = false
     
     var body: some View {
         VStack {
@@ -143,15 +145,31 @@ struct ChatContentView: View {
                     }
                 
                 Button(action: {
-                    guard !inputMessage.isEmpty else { return }
-                    MessageManager.shared.addMessage(.user, inputMessage)
-                    inputMessage = ""
+                    guard !inputMessage.isEmpty || isGenerating else { return }
+                    
+                    if isGenerating {
+                        // TODO: 实现取消生成功能
+                        isGenerating = false
+                    } else {
+                        let message = inputMessage
+                        inputMessage = ""
+                        isGenerating = true
+                        
+                        Task {
+                            do {
+                                try await messageManager.sendMessageToAI(message)
+                            } catch {
+                                print("Error: \(error)")
+                            }
+                            isGenerating = false
+                        }
+                    }
                 }) {
-                    Image(systemName: "arrow.up.circle.fill")
+                    Image(systemName: isGenerating ? "stop.circle.fill" : "arrow.up.circle.fill")
                         .resizable()
                         .frame(width: 38, height: 38)
-                        .foregroundColor(themeManager.colors.primary)
-                        .shadow(color: themeManager.colors.primary.opacity(0.2), radius: 2, x: 0, y: 1)
+                        .foregroundColor(isGenerating ? themeManager.colors.accent : themeManager.colors.primary)
+                        .shadow(color: (isGenerating ? themeManager.colors.accent : themeManager.colors.primary).opacity(0.2), radius: 2, x: 0, y: 1)
                 }
                 .buttonStyle(.plain)
                 .contentShape(Circle())

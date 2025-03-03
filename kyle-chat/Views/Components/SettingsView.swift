@@ -4,6 +4,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var themeManager = ThemeManager.shared
     @StateObject private var userManager = UserManager()
+    @StateObject private var apiManager = APIManager.shared
     @State private var username: String = ""
     @State private var apiKey: String = ""
     @State private var isAPIKeyVisible: Bool = false
@@ -63,10 +64,46 @@ struct SettingsView: View {
                                 .buttonStyle(.plain)
                             }
                             .onChange(of: apiKey) {_, newValue in
-                                UserDefaults.standard.set(newValue, forKey: "OpenAIAPIKey")
+                                apiManager.setAPIKey(newValue)
                             }
                             
                             Text("请输入您的 OpenAI API Key，它将被安全地存储在本地")
+                                .font(.caption)
+                                .foregroundColor(themeManager.colors.foreground.opacity(0.6))
+                            
+                            Button(action: {
+                                Task {
+                                    if await apiManager.validateAPIKey() {
+                                        NSAlert.showInfo("验证成功", "API 密钥有效")
+                                    } else {
+                                        NSAlert.showError("验证失败", "API 密钥无效或网络连接出现问题")
+                                    }
+                                }
+                            }) {
+                                HStack {
+                                    Image(systemName: "checkmark.shield")
+                                    Text("测试 API 密钥")
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 8)
+                            }
+                            .buttonStyle(.plain)
+                            .background(themeManager.colors.secondary.opacity(0.1))
+                            .cornerRadius(6)
+                            .disabled(apiManager.isLoading)
+                            .opacity(apiManager.isLoading ? 0.6 : 1)
+                            
+                            Picker("模型", selection: $apiManager.selectedModel) {
+                                ForEach(apiManager.availableModels, id: \.self) { model in
+                                    Text(model).tag(model)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .frame(maxWidth: .infinity)
+                            .background(themeManager.colors.secondary.opacity(0.1))
+                            .cornerRadius(6)
+                            
+                            Text("选择要使用的 OpenAI 模型")
                                 .font(.caption)
                                 .foregroundColor(themeManager.colors.foreground.opacity(0.6))
                         }
